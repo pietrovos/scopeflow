@@ -1,0 +1,163 @@
+{
+  "realm": "scopeflow",
+  "displayName": "ScopeFlow",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "accessTokenLifespan": 900,
+  "ssoSessionIdleTimeout": 28800,
+  "ssoSessionMaxLifespan": 86400,
+  "bruteForceProtected": true,
+  "smtpServer": {
+    "host": "mailpit",
+    "port": "1025",
+    "from": "no-reply@scopeflow.local",
+    "fromDisplayName": "ScopeFlow"
+  },
+  "clients": [
+    {
+      "clientId": "scopeflow-web",
+      "name": "ScopeFlow web app",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "scopeflow-web-dev-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:3100/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3100"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:3100/*",
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email",
+        "basic"
+      ],
+      "optionalClientScopes": [
+        "offline_access"
+      ],
+      "protocolMappers": [
+        {
+          "name": "scopeflow-api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "scopeflow-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "olivia@northwind.test",
+      "email": "olivia@northwind.test",
+      "firstName": "Olivia",
+      "lastName": "Hart",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "scopeflow-demo",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "priya@northwind.test",
+      "email": "priya@northwind.test",
+      "firstName": "Priya",
+      "lastName": "Raman",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "scopeflow-demo",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "marcus@northwind.test",
+      "email": "marcus@northwind.test",
+      "firstName": "Marcus",
+      "lastName": "Lee",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "scopeflow-demo",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "dana@acmehealth.test",
+      "email": "dana@acmehealth.test",
+      "firstName": "Dana",
+      "lastName": "Whitfield",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "scopeflow-demo",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "leo@brightpath.test",
+      "email": "leo@brightpath.test",
+      "firstName": "Leo",
+      "lastName": "Okafor",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "scopeflow-demo",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "sam@harborpine.test",
+      "email": "sam@harborpine.test",
+      "firstName": "Sam",
+      "lastName": "Castillo",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "scopeflow-demo",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

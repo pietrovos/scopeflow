@@ -1,0 +1,319 @@
+// Tenant isolation is enforced by Postgres row-level security, not by this file.
+// Every table with an org_id column has a policy; see the SQL at the bottom of the
+// migrations that create them, and apps/api/src/db/README.md for the rationale.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  CLIENT
+}
+
+enum Plan {
+  FREE
+  PRO
+  AGENCY
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  ARCHIVED
+}
+
+enum MilestoneStatus {
+  PLANNED
+  IN_PROGRESS
+  DONE
+}
+
+enum ScopeChangeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+enum Decision {
+  APPROVED
+  REJECTED
+}
+
+/// Global identity. Linked to the Keycloak subject on first sign-in.
+model User {
+  id         String   @id @default(uuid()) @db.Uuid
+  externalId String?  @unique @map("external_id")
+  email      String   @unique
+  name       String
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  memberships  Membership[]
+  assignments  ProjectAssignment[]
+  invitations  Invitation[]         @relation("InvitedBy")
+  scopeChanges ScopeChange[]        @relation("ScopeChangeAuthor")
+  revisions    ScopeChangeRevision[]
+  decisions    ScopeChangeDecision[]
+  comments     Comment[]
+  activity     ActivityEvent[]
+
+  @@map("users")
+}
+
+model Organization {
+  id                   String    @id @db.Uuid
+  name                 String
+  slug                 String    @unique
+  plan                 Plan      @default(FREE)
+  stripeCustomerId     String?   @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?   @unique @map("stripe_subscription_id")
+  subscriptionStatus   String?   @map("subscription_status")
+  currentPeriodEnd     DateTime? @map("current_period_end")
+  createdAt            DateTime  @default(now()) @map("created_at")
+
+  memberships  Membership[]
+  invitations  Invitation[]
+  projects     Project[]
+  assignments  ProjectAssignment[]
+  milestones   Milestone[]
+  scopeChanges ScopeChange[]
+  revisions    ScopeChangeRevision[]
+  decisions    ScopeChangeDecision[]
+  comments     Comment[]
+  activity     ActivityEvent[]
+
+  @@map("organizations")
+}
+
+model Membership {
+  id        String   @id @default(uuid()) @db.Uuid
+  orgId     String   @map("org_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  role      Role
+  createdAt DateTime @default(now()) @map("created_at")
+
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, userId])
+  @@index([userId])
+  @@map("memberships")
+}
+
+model Invitation {
+  id          String    @id @default(uuid()) @db.Uuid
+  orgId       String    @map("org_id") @db.Uuid
+  email       String
+  role        Role
+  /// SHA-256 of the token in the invite link. The raw token is only ever in the email.
+  tokenHash   String    @unique @map("token_hash")
+  invitedById String    @map("invited_by_id") @db.Uuid
+  /// Client invitations can grant access to specific projects on acceptance.
+  projectIds  String[]  @default([]) @map("project_ids") @db.Uuid
+  expiresAt   DateTime  @map("expires_at")
+  acceptedAt  DateTime? @map("accepted_at")
+  revokedAt   DateTime? @map("revoked_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  invitedBy User         @relation("InvitedBy", fields: [invitedById], references: [id])
+
+  @@index([orgId])
+  @@map("invitations")
+}
+
+model Project {
+  id          String        @id @default(uuid()) @db.Uuid
+  orgId       String        @map("org_id") @db.Uuid
+  name        String
+  clientName  String        @map("client_name")
+  description String        @default("")
+  status      ProjectStatus @default(ACTIVE)
+  budgetCents Int           @default(0) @map("budget_cents")
+  dueDate     DateTime?     @map("due_date") @db.Date
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  org          Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  assignments  ProjectAssignment[]
+  milestones   Milestone[]
+  scopeChanges ScopeChange[]
+  comments     Comment[]
+  activity     ActivityEvent[]
+
+  @@index([orgId])
+  @@map("projects")
+}
+
+/// Which users can see a project. Only consulted for CLIENT memberships; staff see
+/// every project in their org.
+model ProjectAssignment {
+  orgId     String   @map("org_id") @db.Uuid
+  projectId String   @map("project_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, userId])
+  @@index([orgId, userId])
+  @@map("project_assignments")
+}
+
+model Milestone {
+  id          String          @id @default(uuid()) @db.Uuid
+  orgId       String          @map("org_id") @db.Uuid
+  projectId   String          @map("project_id") @db.Uuid
+  title       String
+  description String          @default("")
+  status      MilestoneStatus @default(PLANNED)
+  dueDate     DateTime?       @map("due_date") @db.Date
+  amountCents Int             @default(0) @map("amount_cents")
+  position    Int             @default(0)
+  /// Optimistic lock. Incremented on every update; stale writes get a 409.
+  version     Int             @default(1)
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, position])
+  @@map("milestones")
+}
+
+/// A proposal to change a project's scope. Its content lives in immutable revisions;
+/// this row tracks status and which revision is current/approved.
+model ScopeChange {
+  id                 String            @id @default(uuid()) @db.Uuid
+  orgId              String            @map("org_id") @db.Uuid
+  projectId          String            @map("project_id") @db.Uuid
+  number             Int
+  status             ScopeChangeStatus @default(PENDING)
+  currentRevisionId  String?           @unique @map("current_revision_id") @db.Uuid
+  approvedRevisionId String?           @unique @map("approved_revision_id") @db.Uuid
+  createdById        String            @map("created_by_id") @db.Uuid
+  version            Int               @default(1)
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+
+  org             Organization          @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project         Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy       User                  @relation("ScopeChangeAuthor", fields: [createdById], references: [id])
+  currentRevision ScopeChangeRevision?  @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
+  approvedRevision ScopeChangeRevision? @relation("ApprovedRevision", fields: [approvedRevisionId], references: [id])
+  revisions       ScopeChangeRevision[] @relation("Revisions")
+  decisions       ScopeChangeDecision[]
+  comments        Comment[]
+
+  @@unique([projectId, number])
+  @@index([orgId, status])
+  @@map("scope_changes")
+}
+
+/// Append-only. A trigger rejects UPDATE and DELETE.
+model ScopeChangeRevision {
+  id                String   @id @default(uuid()) @db.Uuid
+  orgId             String   @map("org_id") @db.Uuid
+  scopeChangeId     String   @map("scope_change_id") @db.Uuid
+  revisionNumber    Int      @map("revision_number")
+  title             String
+  description       String
+  priceDeltaCents   Int      @map("price_delta_cents")
+  deadlineDeltaDays Int      @map("deadline_delta_days")
+  createdById       String   @map("created_by_id") @db.Uuid
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  org         Organization          @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  scopeChange ScopeChange           @relation("Revisions", fields: [scopeChangeId], references: [id], onDelete: Cascade)
+  createdBy   User                  @relation(fields: [createdById], references: [id])
+  currentOf   ScopeChange?          @relation("CurrentRevision")
+  approvedOf  ScopeChange?          @relation("ApprovedRevision")
+  decisions   ScopeChangeDecision[]
+
+  @@unique([scopeChangeId, revisionNumber])
+  @@map("scope_change_revisions")
+}
+
+/// Append-only record of a client's decision on one specific revision.
+model ScopeChangeDecision {
+  id            String   @id @default(uuid()) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  scopeChangeId String   @map("scope_change_id") @db.Uuid
+  revisionId    String   @map("revision_id") @db.Uuid
+  decision      Decision
+  note          String   @default("")
+  decidedById   String   @map("decided_by_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  org         Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  scopeChange ScopeChange         @relation(fields: [scopeChangeId], references: [id], onDelete: Cascade)
+  revision    ScopeChangeRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  decidedBy   User                @relation(fields: [decidedById], references: [id])
+
+  @@index([scopeChangeId])
+  @@map("scope_change_decisions")
+}
+
+model Comment {
+  id            String   @id @default(uuid()) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  projectId     String   @map("project_id") @db.Uuid
+  scopeChangeId String?  @map("scope_change_id") @db.Uuid
+  authorId      String   @map("author_id") @db.Uuid
+  body          String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scopeChange ScopeChange? @relation(fields: [scopeChangeId], references: [id], onDelete: Cascade)
+  author      User         @relation(fields: [authorId], references: [id])
+
+  @@index([projectId, createdAt])
+  @@map("comments")
+}
+
+/// Audit log and activity feed. Append-only (trigger-enforced). `seq` is a global,
+/// monotonically increasing cursor that real-time clients resync from.
+model ActivityEvent {
+  seq        BigInt   @id @default(autoincrement())
+  orgId      String   @map("org_id") @db.Uuid
+  /// Null for org-level events (membership, billing), which clients never see.
+  projectId  String?  @map("project_id") @db.Uuid
+  actorId    String?  @map("actor_id") @db.Uuid
+  type       String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  data       Json     @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project Project?     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  actor   User?        @relation(fields: [actorId], references: [id])
+
+  @@index([orgId, seq])
+  @@index([projectId, seq])
+  @@map("activity_events")
+}
+
+/// Stripe webhook idempotency. The primary key is Stripe's event ID; inserting it in
+/// the same transaction as the side effects makes redelivery a no-op.
+model ProcessedStripeEvent {
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now()) @map("processed_at")
+
+  @@map("processed_stripe_events")
+}

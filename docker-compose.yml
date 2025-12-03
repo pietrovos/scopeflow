@@ -1,0 +1,91 @@
+name: scopeflow
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5544:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d scopeflow"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: scopeflow_owner
+      KC_DB_PASSWORD: scopeflow_owner
+      KC_HTTP_PORT: "8180"
+      # Browsers see Keycloak at localhost:8180, so tokens are issued for that URL.
+      # Server-to-server calls (token exchange, JWKS) go to keycloak:8180 inside the
+      # compose network; dynamic backchannel keeps those endpoints reachable.
+      KC_HOSTNAME: http://localhost:8180
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8180:8180"
+    volumes:
+      - ./infra/keycloak:/opt/keycloak/data/import:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8125:8025"
+      - "1125:1025"
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    profiles: ["app"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://scopeflow_app:scopeflow_app@postgres:5432/scopeflow
+      DATABASE_OWNER_URL: postgresql://scopeflow_owner:scopeflow_owner@postgres:5432/scopeflow
+      OIDC_INTERNAL_URL: http://keycloak:8180/realms/scopeflow
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    ports:
+      - "4100:4100"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    profiles: ["app"]
+    env_file: .env
+    environment:
+      API_INTERNAL_URL: http://api:4100
+      OIDC_INTERNAL_URL: http://keycloak:8180/realms/scopeflow
+    ports:
+      - "3100:3100"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
