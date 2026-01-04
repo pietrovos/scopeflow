@@ -11,7 +11,13 @@ import { Select } from '@/components/ui/field';
 import { useToast } from '@/components/ui/toast';
 
 /** Which client users can see this project. Only owners and admins can change it. */
-export function ClientsPanel({ orgId, projectId, clients, clientMembers, canManage }: {
+export function ClientsPanel({
+  orgId,
+  projectId,
+  clients,
+  clientMembers,
+  canManage,
+}: {
   orgId: string;
   projectId: string;
   clients: Person[];
@@ -80,7 +86,12 @@ export function ClientsPanel({ orgId, projectId, clients, clientMembers, canMana
             <label htmlFor="assign-client" className="sr-only">
               Client to add
             </label>
-            <Select id="assign-client" value={selected} onChange={(e) => setSelected(e.target.value)} className="h-8 flex-1">
+            <Select
+              id="assign-client"
+              value={selected}
+              onChange={(e) => setSelected(e.target.value)}
+              className="h-8 flex-1"
+            >
               <option value="">Add a client…</option>
               {assignable.map((m) => (
                 <option key={m.user.id} value={m.user.id}>

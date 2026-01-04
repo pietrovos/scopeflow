@@ -18,9 +18,10 @@ export const PROJECT_STATUS_LABEL = Object.fromEntries(Object.entries(project).m
   ProjectStatus,
   string
 >;
-export const MILESTONE_STATUS_LABEL = Object.fromEntries(
-  Object.entries(milestone).map(([k, [l]]) => [k, l]),
-) as Record<MilestoneStatus, string>;
+export const MILESTONE_STATUS_LABEL = Object.fromEntries(Object.entries(milestone).map(([k, [l]]) => [k, l])) as Record<
+  MilestoneStatus,
+  string
+>;
 
 export function ProjectStatusBadge({ status }: { status: ProjectStatus }) {
   const [label, tone] = project[status];

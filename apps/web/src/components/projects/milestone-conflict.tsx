@@ -29,7 +29,12 @@ const normalizeDate = (d: string | null) => (d ? d.slice(0, 10) : null);
  * Field-by-field merge after a 409. Fields where the versions agree are hidden; for the
  * rest the user picks theirs or the server's. Nothing is overwritten silently.
  */
-export function MilestoneConflict({ mine, theirs, onResolve, onCancel }: {
+export function MilestoneConflict({
+  mine,
+  theirs,
+  onResolve,
+  onCancel,
+}: {
   mine: Payload;
   theirs: Milestone;
   onResolve: (resolved: Payload) => Promise<void>;
@@ -65,7 +70,10 @@ export function MilestoneConflict({ mine, theirs, onResolve, onCancel }: {
             <span>Saved by someone else</span>
           </div>
           {differing.map((f) => (
-            <div key={f.key} className="grid gap-2 rounded-md border border-border p-3 sm:grid-cols-[8rem_1fr_1fr] sm:items-start sm:gap-3">
+            <div
+              key={f.key}
+              className="grid gap-2 rounded-md border border-border p-3 sm:grid-cols-[8rem_1fr_1fr] sm:items-start sm:gap-3"
+            >
               <span className="text-sm font-medium">{f.label}</span>
               {(['mine', 'theirs'] as const).map((side) => (
                 <div

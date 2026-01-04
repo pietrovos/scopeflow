@@ -1,6 +1,11 @@
 import type { ReactNode } from 'react';
 
-export function PageHeader({ title, description, actions, eyebrow }: {
+export function PageHeader({
+  title,
+  description,
+  actions,
+  eyebrow,
+}: {
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;

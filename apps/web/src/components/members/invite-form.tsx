@@ -12,7 +12,11 @@ import { ErrorNotice } from '@/components/ui/states';
 import { useToast } from '@/components/ui/toast';
 import { CopyLink } from './copy-link';
 
-export function InviteForm({ orgId, projects, canInviteAdmins }: {
+export function InviteForm({
+  orgId,
+  projects,
+  canInviteAdmins,
+}: {
   orgId: string;
   projects: Pick<Project, 'id' | 'name' | 'clientName'>[];
   canInviteAdmins: boolean;
@@ -56,13 +60,17 @@ export function InviteForm({ orgId, projects, canInviteAdmins }: {
         {formError && <ErrorNotice title="Invitation not sent">{formError}</ErrorNotice>}
         <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
           <Field label="Email" error={errors.email}>
-            {(p) => <Input {...p} name="email" type="email" required placeholder="name@company.com" autoComplete="off" />}
+            {(p) => (
+              <Input {...p} name="email" type="email" required placeholder="name@company.com" autoComplete="off" />
+            )}
           </Field>
           <Field label="Role" error={errors.role}>
             {(p) => (
               <Select {...p} value={role} onChange={(e) => setRole(e.target.value as typeof role)}>
                 {roles.map((r) => (
-                  <option key={r} value={r}>{ROLE_LABELS[r]}</option>
+                  <option key={r} value={r}>
+                    {ROLE_LABELS[r]}
+                  </option>
                 ))}
               </Select>
             )}
@@ -77,7 +85,10 @@ export function InviteForm({ orgId, projects, canInviteAdmins }: {
             ) : (
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
                 {projects.map((p) => (
-                  <label key={p.id} className="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm has-[:checked]:border-accent">
+                  <label
+                    key={p.id}
+                    className="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm has-[:checked]:border-accent"
+                  >
                     <input
                       type="checkbox"
                       checked={projectIds.includes(p.id)}
@@ -94,7 +105,9 @@ export function InviteForm({ orgId, projects, canInviteAdmins }: {
             )}
           </fieldset>
         )}
-        <Button type="submit" loading={pending}>Send invitation</Button>
+        <Button type="submit" loading={pending}>
+          Send invitation
+        </Button>
       </form>
       {created?.url && (
         <div className="rounded-md border border-border bg-surface-2 p-3 text-sm">

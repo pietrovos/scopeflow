@@ -8,7 +8,15 @@ import { Select } from '@/components/ui/field';
 import { useToast } from '@/components/ui/toast';
 import { PROJECT_STATUS_LABEL } from '@/components/status';
 
-export function ProjectStatusControl({ orgId, projectId, status }: { orgId: string; projectId: string; status: ProjectStatus }) {
+export function ProjectStatusControl({
+  orgId,
+  projectId,
+  status,
+}: {
+  orgId: string;
+  projectId: string;
+  status: ProjectStatus;
+}) {
   const api = useApi();
   const router = useRouter();
   const toast = useToast();

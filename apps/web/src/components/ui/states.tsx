@@ -2,7 +2,13 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { Spinner } from './spinner';
 
-export function EmptyState({ title, description, action, icon, className }: {
+export function EmptyState({
+  title,
+  description,
+  action,
+  icon,
+  className,
+}: {
   title: string;
   description?: ReactNode;
   action?: ReactNode;
@@ -11,7 +17,11 @@ export function EmptyState({ title, description, action, icon, className }: {
 }) {
   return (
     <div className={cn('flex flex-col items-center px-6 py-10 text-center', className)}>
-      {icon && <div className="mb-3 text-muted" aria-hidden="true">{icon}</div>}
+      {icon && (
+        <div className="mb-3 text-muted" aria-hidden="true">
+          {icon}
+        </div>
+      )}
       <p className="font-medium">{title}</p>
       {description && <p className="mt-1 max-w-sm text-sm text-muted">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
@@ -19,7 +29,11 @@ export function EmptyState({ title, description, action, icon, className }: {
   );
 }
 
-export function ErrorNotice({ title = 'Something went wrong', children, action }: {
+export function ErrorNotice({
+  title = 'Something went wrong',
+  children,
+  action,
+}: {
   title?: string;
   children?: ReactNode;
   action?: ReactNode;
@@ -37,7 +51,9 @@ export function LoadingBlock({ label = 'Loading' }: { label?: string }) {
   return (
     <div className="flex items-center justify-center gap-2 py-12 text-muted">
       <Spinner label={label} />
-      <span aria-hidden="true" className="text-sm">{label}…</span>
+      <span aria-hidden="true" className="text-sm">
+        {label}…
+      </span>
     </div>
   );
 }

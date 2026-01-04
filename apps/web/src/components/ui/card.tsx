@@ -5,7 +5,12 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div className={cn('rounded-lg border border-border bg-surface shadow-sm', className)} {...props} />;
 }
 
-export function CardHeader({ title, description, action, as: As = 'h2' }: {
+export function CardHeader({
+  title,
+  description,
+  action,
+  as: As = 'h2',
+}: {
   title: ReactNode;
   description?: ReactNode;
   action?: ReactNode;

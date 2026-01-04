@@ -19,7 +19,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-        ports: ["5544:5432"]
+        ports: ['5544:5432']
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 3s --health-timeout 3s --health-retries 20
@@ -40,6 +40,7 @@ jobs:
         run: psql postgresql://postgres:postgres@localhost:5544/postgres -v ON_ERROR_STOP=1 -f infra/postgres/init.sql
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @scopeflow/shared build
+      - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test

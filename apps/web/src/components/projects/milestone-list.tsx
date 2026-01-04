@@ -87,7 +87,11 @@ export function MilestoneList({ orgId, projectId, milestones, canEdit }: Props) 
       {milestones.length === 0 ? (
         <EmptyState
           title="No milestones yet"
-          description={canEdit ? 'Break the project into deliverables your client can follow.' : 'The agency hasn’t added milestones yet.'}
+          description={
+            canEdit
+              ? 'Break the project into deliverables your client can follow.'
+              : 'The agency hasn’t added milestones yet.'
+          }
         />
       ) : (
         <ol className="divide-y divide-border">
@@ -209,7 +213,11 @@ export function MilestoneList({ orgId, projectId, milestones, canEdit }: Props) 
   );
 }
 
-function MilestoneForm({ initial, onSubmit, onCancel }: {
+function MilestoneForm({
+  initial,
+  onSubmit,
+  onCancel,
+}: {
   initial?: Milestone;
   onSubmit: (d: Draft) => Promise<void>;
   onCancel: () => void;
@@ -240,7 +248,9 @@ function MilestoneForm({ initial, onSubmit, onCancel }: {
     >
       {formError && <ErrorNotice title="Couldn’t save">{formError}</ErrorNotice>}
       <Field label="Title" error={errors.title}>
-        {(p) => <Input {...p} value={draft.title} onChange={(e) => set('title', e.target.value)} required maxLength={160} />}
+        {(p) => (
+          <Input {...p} value={draft.title} onChange={(e) => set('title', e.target.value)} required maxLength={160} />
+        )}
       </Field>
       <Field label="Description" error={errors.description}>
         {(p) => <Textarea {...p} value={draft.description} onChange={(e) => set('description', e.target.value)} />}
@@ -250,7 +260,9 @@ function MilestoneForm({ initial, onSubmit, onCancel }: {
           {(p) => <Input {...p} type="date" value={draft.dueDate} onChange={(e) => set('dueDate', e.target.value)} />}
         </Field>
         <Field label="Amount (USD)" error={errors.amountCents}>
-          {(p) => <Input {...p} inputMode="decimal" value={draft.amount} onChange={(e) => set('amount', e.target.value)} />}
+          {(p) => (
+            <Input {...p} inputMode="decimal" value={draft.amount} onChange={(e) => set('amount', e.target.value)} />
+          )}
         </Field>
         <Field label="Status" error={errors.status}>
           {(p) => (

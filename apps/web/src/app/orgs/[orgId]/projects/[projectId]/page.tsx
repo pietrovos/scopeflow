@@ -9,6 +9,9 @@ import { ProjectStatusBadge } from '@/components/status';
 import { MilestoneList } from '@/components/projects/milestone-list';
 import { ClientsPanel } from '@/components/projects/clients-panel';
 import { ProjectStatusControl } from '@/components/projects/project-status-control';
+import { MilestoneTimeline } from '@/components/portal/milestone-timeline';
+import { ProjectSummary } from '@/components/portal/project-summary';
+import { CardHeader } from '@/components/ui/card';
 
 export async function generateMetadata({ params }: PageProps<'/orgs/[orgId]/projects/[projectId]'>) {
   const { orgId, projectId } = await params;
@@ -39,39 +42,66 @@ export default async function ProjectPage({ params }: PageProps<'/orgs/[orgId]/p
           </span>
         }
         actions={
-          project.canEdit ? <ProjectStatusControl orgId={orgId} projectId={projectId} status={project.status} /> : undefined
+          project.canEdit ? (
+            <ProjectStatusControl orgId={orgId} projectId={projectId} status={project.status} />
+          ) : undefined
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
-        <div className="min-w-0 space-y-6">
-          <MilestoneList orgId={orgId} projectId={projectId} milestones={project.milestones} canEdit={project.canEdit} />
+      {!project.canEdit ? (
+        <div className="space-y-6">
+          <ProjectSummary project={project} />
+          <div className={project.description ? 'grid gap-6 xl:grid-cols-[1fr_20rem]' : undefined}>
+            <Card>
+              <CardHeader title="Timeline" description="Where the project stands, milestone by milestone." />
+              <MilestoneTimeline milestones={project.milestones} />
+            </Card>
+            {project.description && (
+              <Card className="h-fit p-5">
+                <h2 className="text-base font-semibold">About this project</h2>
+                <p className="mt-2 whitespace-pre-line text-sm text-muted">{project.description}</p>
+              </Card>
+            )}
+          </div>
         </div>
-
-        <aside className="space-y-6">
-          <Card className="p-4 sm:p-5">
-            <h2 className="text-base font-semibold">Details</h2>
-            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-              <dt className="text-muted">Budget</dt>
-              <dd className="text-right font-medium">{formatCents(project.budgetCents)}</dd>
-              <dt className="text-muted">Milestones total</dt>
-              <dd className="text-right font-medium">{formatCents(totalMilestones)}</dd>
-              <dt className="text-muted">Due</dt>
-              <dd className="text-right font-medium">{formatDate(project.dueDate)}</dd>
-            </dl>
-            {project.description && <p className="mt-4 whitespace-pre-line text-sm text-muted">{project.description}</p>}
-          </Card>
-          {project.canEdit && (
-            <ClientsPanel
+      ) : (
+        <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
+          <div className="min-w-0 space-y-6">
+            <MilestoneList
               orgId={orgId}
               projectId={projectId}
-              clients={project.clients}
-              clientMembers={members.filter((m) => m.role === 'CLIENT')}
-              canManage={manager}
+              milestones={project.milestones}
+              canEdit={project.canEdit}
             />
-          )}
-        </aside>
-      </div>
+          </div>
+
+          <aside className="space-y-6">
+            <Card className="p-4 sm:p-5">
+              <h2 className="text-base font-semibold">Details</h2>
+              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                <dt className="text-muted">Budget</dt>
+                <dd className="text-right font-medium">{formatCents(project.budgetCents)}</dd>
+                <dt className="text-muted">Milestones total</dt>
+                <dd className="text-right font-medium">{formatCents(totalMilestones)}</dd>
+                <dt className="text-muted">Due</dt>
+                <dd className="text-right font-medium">{formatDate(project.dueDate)}</dd>
+              </dl>
+              {project.description && (
+                <p className="mt-4 whitespace-pre-line text-sm text-muted">{project.description}</p>
+              )}
+            </Card>
+            {project.canEdit && (
+              <ClientsPanel
+                orgId={orgId}
+                projectId={projectId}
+                clients={project.clients}
+                clientMembers={members.filter((m) => m.role === 'CLIENT')}
+                canManage={manager}
+              />
+            )}
+          </aside>
+        </div>
+      )}
     </>
   );
 }

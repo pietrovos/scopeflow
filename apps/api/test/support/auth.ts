@@ -15,7 +15,10 @@ export interface TestIdentity {
   name: string;
 }
 
-export function identity(name: string, email = `${name.toLowerCase().replace(/\s+/g, '.')}@example.test`): TestIdentity {
+export function identity(
+  name: string,
+  email = `${name.toLowerCase().replace(/\s+/g, '.')}@example.test`,
+): TestIdentity {
   return { sub: randomUUID(), email, name };
 }
 

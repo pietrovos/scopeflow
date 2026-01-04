@@ -34,8 +34,13 @@ export default async function OrgLayout({ children, params }: LayoutProps<'/orgs
       </a>
 
       <aside className="hidden border-r border-border bg-surface lg:flex lg:flex-col lg:gap-6 lg:p-4">
-        <Link href={`/orgs/${orgId}`} className="px-1 text-lg font-semibold">
+        <Link href={`/orgs/${orgId}`} className="flex items-center gap-2 px-1 text-lg font-semibold">
           ScopeFlow
+          {org.role === 'CLIENT' && (
+            <span className="rounded-full bg-warning-soft px-2 py-0.5 text-xs font-medium text-warning">
+              Client portal
+            </span>
+          )}
         </Link>
         <OrgSwitcher current={org} orgs={me.organizations} />
         <nav aria-label="Main" className="flex-1">

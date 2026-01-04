@@ -19,7 +19,10 @@ export class ProjectsController {
 
   @StaffOnly()
   @Post()
-  create(@Tenant() t: TenantContext, @Body(new ZodPipe(createProjectSchema)) body: z.output<typeof createProjectSchema>) {
+  create(
+    @Tenant() t: TenantContext,
+    @Body(new ZodPipe(createProjectSchema)) body: z.output<typeof createProjectSchema>,
+  ) {
     return this.projects.create(t, body);
   }
 

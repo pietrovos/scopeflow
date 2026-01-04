@@ -30,7 +30,10 @@ export default async function MembersPage({ params }: PageProps<'/orgs/[orgId]/m
       <div className="space-y-6">
         {manager && (
           <Card>
-            <CardHeader title="Invite someone" description="Team members see every project. Clients only see projects you share with them." />
+            <CardHeader
+              title="Invite someone"
+              description="Team members see every project. Clients only see projects you share with them."
+            />
             <div className="p-4 sm:p-5">
               <InviteForm orgId={orgId} projects={projects} canInviteAdmins={org.role === 'OWNER'} />
             </div>
@@ -41,7 +44,10 @@ export default async function MembersPage({ params }: PageProps<'/orgs/[orgId]/m
           <MembersTable orgId={orgId} members={staff} viewer={viewer} />
         </Card>
         <Card>
-          <CardHeader title={`Clients (${clients.length})`} description="Assign clients to projects from each project’s page." />
+          <CardHeader
+            title={`Clients (${clients.length})`}
+            description="Assign clients to projects from each project’s page."
+          />
           {clients.length > 0 ? (
             <MembersTable orgId={orgId} members={clients} viewer={viewer} />
           ) : (

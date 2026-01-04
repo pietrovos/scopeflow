@@ -13,7 +13,11 @@ import { useToast } from '@/components/ui/toast';
 
 const ASSIGNABLE: Exclude<Role, 'OWNER'>[] = ['ADMIN', 'MEMBER', 'CLIENT'];
 
-export function MembersTable({ orgId, members, viewer }: {
+export function MembersTable({
+  orgId,
+  members,
+  viewer,
+}: {
   orgId: string;
   members: Member[];
   viewer: { userId: string; role: Role };
@@ -43,10 +47,18 @@ export function MembersTable({ orgId, members, viewer }: {
         <caption className="sr-only">Organization members</caption>
         <thead>
           <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
-            <th scope="col" className="px-5 py-2 font-medium">Person</th>
-            <th scope="col" className="px-3 py-2 font-medium">Role</th>
-            <th scope="col" className="px-3 py-2 font-medium">Joined</th>
-            <th scope="col" className="px-5 py-2"><span className="sr-only">Actions</span></th>
+            <th scope="col" className="px-5 py-2 font-medium">
+              Person
+            </th>
+            <th scope="col" className="px-3 py-2 font-medium">
+              Role
+            </th>
+            <th scope="col" className="px-3 py-2 font-medium">
+              Joined
+            </th>
+            <th scope="col" className="px-5 py-2">
+              <span className="sr-only">Actions</span>
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -67,7 +79,9 @@ export function MembersTable({ orgId, members, viewer }: {
               <td className="px-3 py-3">
                 {canManage(m) ? (
                   <>
-                    <label htmlFor={`role-${m.id}`} className="sr-only">Role for {m.user.name}</label>
+                    <label htmlFor={`role-${m.id}`} className="sr-only">
+                      Role for {m.user.name}
+                    </label>
                     <Select
                       id={`role-${m.id}`}
                       defaultValue={m.role}
@@ -79,9 +93,13 @@ export function MembersTable({ orgId, members, viewer }: {
                         )
                       }
                     >
-                      {ASSIGNABLE.filter((r) => viewer.role === 'OWNER' || r !== 'ADMIN' || m.role === 'ADMIN').map((r) => (
-                        <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-                      ))}
+                      {ASSIGNABLE.filter((r) => viewer.role === 'OWNER' || r !== 'ADMIN' || m.role === 'ADMIN').map(
+                        (r) => (
+                          <option key={r} value={r}>
+                            {ROLE_LABELS[r]}
+                          </option>
+                        ),
+                      )}
                     </Select>
                   </>
                 ) : (

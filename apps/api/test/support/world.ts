@@ -29,7 +29,12 @@ export async function buildOrg(t: TestApp, label: string) {
   const client = identity(`${label} Client`);
   const o = await t.as(owner);
 
-  const org = (await o.post('/orgs').send({ name: `${label} Agency` }).expect(201)).body as { id: string; name: string };
+  const org = (
+    await o
+      .post('/orgs')
+      .send({ name: `${label} Agency` })
+      .expect(201)
+  ).body as { id: string; name: string };
   const project = (
     await o
       .post(`/orgs/${org.id}/projects`)
@@ -37,13 +42,22 @@ export async function buildOrg(t: TestApp, label: string) {
       .expect(201)
   ).body as { id: string; name: string };
   const hiddenProject = (
-    await o.post(`/orgs/${org.id}/projects`).send({ name: `${label} Internal`, clientName: 'Other' }).expect(201)
+    await o
+      .post(`/orgs/${org.id}/projects`)
+      .send({ name: `${label} Internal`, clientName: 'Other' })
+      .expect(201)
   ).body as { id: string; name: string };
   const milestone = (
-    await o.post(`/orgs/${org.id}/projects/${project.id}/milestones`).send({ title: `${label} Discovery` }).expect(201)
+    await o
+      .post(`/orgs/${org.id}/projects/${project.id}/milestones`)
+      .send({ title: `${label} Discovery` })
+      .expect(201)
   ).body as { id: string; version: number };
   const hiddenMilestone = (
-    await o.post(`/orgs/${org.id}/projects/${hiddenProject.id}/milestones`).send({ title: `${label} Secret` }).expect(201)
+    await o
+      .post(`/orgs/${org.id}/projects/${hiddenProject.id}/milestones`)
+      .send({ title: `${label} Secret` })
+      .expect(201)
   ).body as { id: string; version: number };
 
   await join(t, owner, org.id, admin, 'ADMIN');

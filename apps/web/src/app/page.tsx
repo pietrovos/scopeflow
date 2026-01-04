@@ -34,8 +34,8 @@ export default async function Home({ searchParams }: PageProps<'/'>) {
           Agree on scope changes with your clients.
         </h1>
         <p className="mt-5 max-w-xl text-lg text-muted">
-          Track projects and milestones, propose changes with a clear price and deadline impact, and get approval on
-          the exact revision your client read, with a full audit trail.
+          Track projects and milestones, then propose changes with their price and deadline impact. Clients approve a
+          specific revision, and the project keeps a record of each edit and decision.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <SignInButton label="Sign in to ScopeFlow" />
@@ -44,7 +44,10 @@ export default async function Home({ searchParams }: PageProps<'/'>) {
 
         <dl className="mt-16 grid gap-6 sm:grid-cols-3">
           {[
-            ['Immutable revisions', 'Edits create a new revision. An approval always points at the one the client saw.'],
+            [
+              'Immutable revisions',
+              'Each edit creates a new revision. Approvals record which revision the client accepted.',
+            ],
             [
               'Live updates',
               'See comments and project activity as they happen. Missed events load when you reconnect.',
@@ -66,7 +69,13 @@ function Logo() {
   return (
     <svg viewBox="0 0 24 24" className="size-6 text-accent" aria-hidden="true">
       <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" />
-      <path d="M7 15.5c2.5 1.5 7.5 1.5 10-1M7 9.5c2.5-1.5 7.5-1.5 10 1" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path
+        d="M7 15.5c2.5 1.5 7.5 1.5 10-1M7 9.5c2.5-1.5 7.5-1.5 10 1"
+        stroke="white"
+        strokeWidth="2"
+        fill="none"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

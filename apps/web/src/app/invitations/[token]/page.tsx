@@ -11,9 +11,12 @@ import { AcceptInvitation } from './accept-invitation';
 export const metadata = { title: 'Invitation' };
 
 async function preview(token: string): Promise<InvitationPreview | null> {
-  const res = await fetch(`${process.env.API_INTERNAL_URL ?? 'http://localhost:4100'}/invitations/${encodeURIComponent(token)}`, {
-    cache: 'no-store',
-  });
+  const res = await fetch(
+    `${process.env.API_INTERNAL_URL ?? 'http://localhost:4100'}/invitations/${encodeURIComponent(token)}`,
+    {
+      cache: 'no-store',
+    },
+  );
   return res.ok ? ((await res.json()) as InvitationPreview) : null;
 }
 
@@ -28,7 +31,9 @@ export default async function InvitationPage({ params }: PageProps<'/invitations
         {!inv ? (
           <>
             <h1 className="text-xl font-semibold">This invitation isn’t valid</h1>
-            <p className="mt-2 text-muted">It may have been revoked or replaced. Ask whoever invited you for a new link.</p>
+            <p className="mt-2 text-muted">
+              It may have been revoked or replaced. Ask whoever invited you for a new link.
+            </p>
           </>
         ) : (
           <>
@@ -59,7 +64,9 @@ export default async function InvitationPage({ params }: PageProps<'/invitations
         )}
       </Card>
       <p className="mt-4 text-center text-sm">
-        <Link href="/" className="text-muted hover:text-text">ScopeFlow</Link>
+        <Link href="/" className="text-muted hover:text-text">
+          ScopeFlow
+        </Link>
       </p>
     </main>
   );

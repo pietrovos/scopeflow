@@ -28,7 +28,10 @@ export default async function OrgPicker() {
           <ul className="divide-y divide-border">
             {me.organizations.map((org) => (
               <li key={org.id}>
-                <Link href={`/orgs/${org.id}`} className="flex items-center justify-between px-5 py-4 hover:bg-surface-2">
+                <Link
+                  href={`/orgs/${org.id}`}
+                  className="flex items-center justify-between px-5 py-4 hover:bg-surface-2"
+                >
                   <span className="font-medium">{org.name}</span>
                   <Badge>{ROLE_LABELS[org.role]}</Badge>
                 </Link>
