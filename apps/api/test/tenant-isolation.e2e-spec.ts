@@ -36,10 +36,19 @@ describe('tenant isolation: org A cannot reach org B through any endpoint', () =
       invitationId: bInvite.body.id,
       userId: b.membershipOf(b.client).user.id,
       token: 'not-a-real-token',
-      ...(await extraIds(b)),
+      ...(await extraIds(t, b)),
     };
     // Anything that would prove a leak if it showed up in a response body.
-    bSecrets = [b.org.id, b.org.name, b.project.id, b.project.name, b.milestone.id, b.hiddenProject.name, 'Bravo'];
+    bSecrets = [
+      b.org.id,
+      b.org.name,
+      b.project.id,
+      b.project.name,
+      b.milestone.id,
+      b.hiddenProject.name,
+      bIds.scopeChangeId!,
+      'Bravo',
+    ];
   });
   afterAll(() => t.close());
 
@@ -51,6 +60,8 @@ describe('tenant isolation: org A cannot reach org B through any endpoint', () =
       UNION ALL SELECT 'invitations', md5(string_agg(i::text, ',' ORDER BY id)) FROM invitations i WHERE org_id = '${b.org.id}'
       UNION ALL SELECT 'assignments', md5(string_agg(x::text, ',' ORDER BY project_id, user_id)) FROM project_assignments x WHERE org_id = '${b.org.id}'
       UNION ALL SELECT 'scope_changes', md5(string_agg(s::text, ',' ORDER BY id)) FROM scope_changes s WHERE org_id = '${b.org.id}'
+      UNION ALL SELECT 'revisions', md5(string_agg(r::text, ',' ORDER BY id)) FROM scope_change_revisions r WHERE org_id = '${b.org.id}'
+      UNION ALL SELECT 'decisions', md5(string_agg(d::text, ',' ORDER BY id)) FROM scope_change_decisions d WHERE org_id = '${b.org.id}'
       UNION ALL SELECT 'comments', md5(string_agg(c::text, ',' ORDER BY id)) FROM comments c WHERE org_id = '${b.org.id}'
       UNION ALL SELECT 'organization', md5(o::text) FROM organizations o WHERE id = '${b.org.id}'
     `);
@@ -122,6 +133,15 @@ describe('tenant isolation: org A cannot reach org B through any endpoint', () =
       await client.get(`/orgs/${b.org.id}/projects/${b.project.id}`).expect(404);
       await client.get(`/orgs/${a.org.id}/projects/${b.project.id}`).expect(404);
     }
+    // The decision route is client-only, so the owner sweep stops at the role check.
+    // Make sure A's client is also refused B's proposal.
+    const c = await t.as(a.client);
+    for (const projectId of [a.project.id, b.project.id]) {
+      await c
+        .post(`/orgs/${a.org.id}/projects/${projectId}/scope-changes/${bIds.scopeChangeId}/decision`)
+        .send({ revisionId: bIds.revisionId, decision: 'APPROVED' })
+        .expect(404);
+    }
   });
 });
 
@@ -149,6 +169,10 @@ function bodyFor(ids: Record<string, string>) {
 }
 
 /** IDs for resources added by later milestones; extended as the API grows. */
-async function extraIds(_b: World): Promise<Record<string, string>> {
-  return {};
+async function extraIds(t: TestApp, b: World): Promise<Record<string, string>> {
+  const sc = await (await t.as(b.owner))
+    .post(`/orgs/${b.org.id}/projects/${b.project.id}/scope-changes`)
+    .send({ title: 'Bravo change', description: 'Bravo scope', priceDeltaCents: 5000, deadlineDeltaDays: 2 })
+    .expect(201);
+  return { scopeChangeId: sc.body.id, revisionId: sc.body.currentRevisionId };
 }

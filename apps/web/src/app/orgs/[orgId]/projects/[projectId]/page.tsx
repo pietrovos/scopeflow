@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { formatCents, isManager } from '@scopeflow/shared';
 import { serverApi } from '@/lib/server-api';
-import type { Member, ProjectDetail } from '@/lib/types';
+import type { Member, ProjectDetail, ScopeChangeSummary } from '@/lib/types';
 import { formatDate } from '@/lib/format';
 import { PageHeader } from '@/components/page-header';
 import { Card } from '@/components/ui/card';
@@ -12,6 +12,8 @@ import { ProjectStatusControl } from '@/components/projects/project-status-contr
 import { MilestoneTimeline } from '@/components/portal/milestone-timeline';
 import { ProjectSummary } from '@/components/portal/project-summary';
 import { CardHeader } from '@/components/ui/card';
+import { ScopeChangeList } from '@/components/scope/scope-change-list';
+import { formatDayDelta } from '@scopeflow/shared';
 
 export async function generateMetadata({ params }: PageProps<'/orgs/[orgId]/projects/[projectId]'>) {
   const { orgId, projectId } = await params;
@@ -21,7 +23,10 @@ export async function generateMetadata({ params }: PageProps<'/orgs/[orgId]/proj
 
 export default async function ProjectPage({ params }: PageProps<'/orgs/[orgId]/projects/[projectId]'>) {
   const { orgId, projectId } = await params;
-  const project = await serverApi<ProjectDetail>(`/orgs/${orgId}/projects/${projectId}`);
+  const [project, scopeChanges] = await Promise.all([
+    serverApi<ProjectDetail>(`/orgs/${orgId}/projects/${projectId}`),
+    serverApi<ScopeChangeSummary[]>(`/orgs/${orgId}/projects/${projectId}/scope-changes`),
+  ]);
   const manager = isManager(project.viewerRole);
   const members = project.canEdit ? await serverApi<Member[]>(`/orgs/${orgId}/members`) : [];
   const totalMilestones = project.milestones.reduce((sum, m) => sum + m.amountCents, 0);
@@ -51,6 +56,7 @@ export default async function ProjectPage({ params }: PageProps<'/orgs/[orgId]/p
       {!project.canEdit ? (
         <div className="space-y-6">
           <ProjectSummary project={project} />
+          <ScopeChangeList orgId={orgId} projectId={projectId} items={scopeChanges} canPropose={false} />
           <div className={project.description ? 'grid gap-6 xl:grid-cols-[1fr_20rem]' : undefined}>
             <Card>
               <CardHeader title="Timeline" description="Where the project stands, milestone by milestone." />
@@ -73,6 +79,7 @@ export default async function ProjectPage({ params }: PageProps<'/orgs/[orgId]/p
               milestones={project.milestones}
               canEdit={project.canEdit}
             />
+            <ScopeChangeList orgId={orgId} projectId={projectId} items={scopeChanges} canPropose />
           </div>
 
           <aside className="space-y-6">
@@ -81,6 +88,16 @@ export default async function ProjectPage({ params }: PageProps<'/orgs/[orgId]/p
               <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                 <dt className="text-muted">Budget</dt>
                 <dd className="text-right font-medium">{formatCents(project.budgetCents)}</dd>
+                <dt className="text-muted">Approved changes</dt>
+                <dd className="text-right font-medium">
+                  {formatCents(project.scope.approvedPriceDeltaCents, { signed: true })}
+                </dd>
+                <dt className="text-muted">Current total</dt>
+                <dd className="text-right font-semibold">
+                  {formatCents(project.budgetCents + project.scope.approvedPriceDeltaCents)}
+                </dd>
+                <dt className="text-muted">Schedule change</dt>
+                <dd className="text-right font-medium">{formatDayDelta(project.scope.approvedDeadlineDeltaDays)}</dd>
                 <dt className="text-muted">Milestones total</dt>
                 <dd className="text-right font-medium">{formatCents(totalMilestones)}</dd>
                 <dt className="text-muted">Due</dt>

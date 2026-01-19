@@ -60,6 +60,7 @@ export interface ProjectDetail extends Project {
   clients: Person[];
   viewerRole: Role;
   canEdit: boolean;
+  scope: ScopeTotals;
 }
 
 export interface Member {
@@ -86,4 +87,53 @@ export interface InvitationPreview {
   email: string;
   role: Role;
   status: 'pending' | 'accepted' | 'expired';
+}
+
+export type ScopeChangeStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'WITHDRAWN';
+
+export interface Revision {
+  id: string;
+  revisionNumber: number;
+  title: string;
+  description: string;
+  priceDeltaCents: number;
+  deadlineDeltaDays: number;
+  createdAt: string;
+  createdBy: { id: string; name: string };
+}
+
+export interface ScopeChangeSummary {
+  id: string;
+  projectId: string;
+  number: number;
+  status: ScopeChangeStatus;
+  currentRevisionId: string | null;
+  approvedRevisionId: string | null;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: { id: string; name: string };
+  currentRevision: Revision | null;
+  project: { id: string; name: string; clientName: string };
+}
+
+export interface Decision {
+  id: string;
+  revisionId: string;
+  decision: 'APPROVED' | 'REJECTED';
+  note: string;
+  createdAt: string;
+  decidedBy: { id: string; name: string };
+}
+
+export interface ScopeChangeDetail extends ScopeChangeSummary {
+  revisions: Revision[];
+  decisions: Decision[];
+}
+
+export interface ScopeTotals {
+  approvedCount: number;
+  approvedPriceDeltaCents: number;
+  approvedDeadlineDeltaDays: number;
+  pendingCount: number;
 }

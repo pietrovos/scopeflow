@@ -3,10 +3,10 @@
 ScopeFlow isolates tenant data with Postgres row-level security (see
 `prisma/migrations/*_row_level_security`). The API has two connections:
 
-| Client                | Role              | RLS      | Used for |
-|-----------------------|-------------------|----------|----------|
-| `PrismaService`       | `scopeflow_app`   | enforced | every request, always through `TenantDb.run()` |
-| `SystemPrismaService` | `scopeflow_owner` | bypassed | the system paths below, nothing else |
+| Client                | Role              | RLS      | Used for                                       |
+| --------------------- | ----------------- | -------- | ---------------------------------------------- |
+| `PrismaService`       | `scopeflow_app`   | enforced | tenant requests through `TenantDb.run()` |
+| `SystemPrismaService` | `scopeflow_owner` | bypassed | the system paths listed below           |
 
 ## Why RLS instead of a guard or a Prisma extension
 

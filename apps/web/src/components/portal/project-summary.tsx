@@ -22,7 +22,14 @@ export function ProjectSummary({ project }: { project: ProjectDetail }) {
         </div>
         <div>
           <dt className="text-muted">Budget</dt>
-          <dd className="mt-0.5 text-lg font-semibold">{formatCents(project.budgetCents)}</dd>
+          <dd className="mt-0.5 text-lg font-semibold">
+            {formatCents(project.budgetCents + project.scope.approvedPriceDeltaCents)}
+          </dd>
+          {project.scope.approvedCount > 0 && (
+            <dd className="text-xs text-muted">
+              incl. {formatCents(project.scope.approvedPriceDeltaCents, { signed: true })} approved changes
+            </dd>
+          )}
         </div>
         <div>
           <dt className="text-muted">Target date</dt>

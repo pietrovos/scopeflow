@@ -45,8 +45,27 @@ export class ProjectsService {
         },
       });
       if (!project) throw new NotFoundException('Project not found');
+      const [approved, pending] = await Promise.all([
+        tx.scopeChangeRevision.aggregate({
+          where: { approvedOf: { projectId } },
+          _sum: { priceDeltaCents: true, deadlineDeltaDays: true },
+          _count: true,
+        }),
+        tx.scopeChange.count({ where: { projectId, status: 'PENDING' } }),
+      ]);
       const { assignments, ...rest } = project;
-      return { ...rest, clients: assignments.map((a) => a.user), viewerRole: t.role, canEdit: isStaff(t.role) };
+      return {
+        ...rest,
+        clients: assignments.map((a) => a.user),
+        viewerRole: t.role,
+        canEdit: isStaff(t.role),
+        scope: {
+          approvedCount: approved._count,
+          approvedPriceDeltaCents: approved._sum.priceDeltaCents ?? 0,
+          approvedDeadlineDeltaDays: approved._sum.deadlineDeltaDays ?? 0,
+          pendingCount: pending,
+        },
+      };
     });
   }
 

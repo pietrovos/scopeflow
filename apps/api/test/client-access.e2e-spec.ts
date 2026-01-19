@@ -36,7 +36,17 @@ describe('client visibility', () => {
         .replace(':orgId', w.org.id)
         .replace(':projectId', w.hiddenProject.id)
         .replace(/:\w+/g, w.hiddenMilestone.id);
-      const res = await c[route.method](url).send({ title: 'x', body: 'x', version: 1, userId: w.org.id });
+      const res = await c[route.method](url).send({
+        title: 'x',
+        description: 'x',
+        body: 'x',
+        version: 1,
+        priceDeltaCents: 1,
+        deadlineDeltaDays: 1,
+        userId: w.org.id,
+        revisionId: w.org.id,
+        decision: 'APPROVED',
+      });
       const label = `${route.method.toUpperCase()} ${route.path}`;
       // 403 is fine for staff-only routes (role check runs first); never 2xx.
       expect([403, 404], label).toContain(res.status);

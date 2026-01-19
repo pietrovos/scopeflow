@@ -11,6 +11,7 @@ import { ActivityModule } from './activity/activity.module.js';
 import { OrganizationsModule } from './organizations/organizations.module.js';
 import { ProjectsModule } from './projects/projects.module.js';
 import { MilestonesModule } from './milestones/milestones.module.js';
+import { ScopeChangesModule } from './scope-changes/scope-changes.module.js';
 import { MailModule } from './mail/mail.module.js';
 import { HealthController } from './health/health.controller.js';
 
@@ -25,6 +26,7 @@ import { HealthController } from './health/health.controller.js';
     OrganizationsModule,
     ProjectsModule,
     MilestonesModule,
+    ScopeChangesModule,
   ],
   controllers: [HealthController],
   providers: [
