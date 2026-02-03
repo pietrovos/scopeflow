@@ -1,6 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import { createMilestoneSchema, updateMilestoneSchema } from '@scopeflow/shared';
-import type { z } from 'zod';
+import { z } from 'zod';
+
+const deleteQuery = z.object({ version: z.coerce.number().int().positive().optional() });
 import { UuidPipe } from '../common/uuid.pipe.js';
 import { ZodPipe } from '../common/zod.pipe.js';
 import { StaffOnly } from '../tenancy/roles.decorator.js';
@@ -45,7 +47,8 @@ export class MilestonesController {
     @Tenant() t: TenantContext,
     @Param('projectId', UuidPipe) projectId: string,
     @Param('milestoneId', UuidPipe) milestoneId: string,
+    @Query(new ZodPipe(deleteQuery)) q: z.infer<typeof deleteQuery>,
   ) {
-    await this.milestones.remove(t, projectId, milestoneId);
+    await this.milestones.remove(t, projectId, milestoneId, q.version);
   }
 }

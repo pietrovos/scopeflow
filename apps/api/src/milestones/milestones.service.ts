@@ -80,11 +80,17 @@ export class MilestonesService {
     });
   }
 
-  remove(t: TenantContext, projectId: string, milestoneId: string) {
+  /** With `version`, the delete only applies if nobody changed the milestone since it was read. */
+  remove(t: TenantContext, projectId: string, milestoneId: string, version?: number) {
     return this.db.run(t, async (tx) => {
       const milestone = await tx.milestone.findFirst({ where: { id: milestoneId, projectId } });
       if (!milestone) throw new NotFoundException('Milestone not found');
-      await tx.milestone.delete({ where: { id: milestoneId } });
+      const { count } = await tx.milestone.deleteMany({
+        where: { id: milestoneId, ...(version !== undefined ? { version } : {}) },
+      });
+      if (count === 0) {
+        throw new VersionConflictException(milestone, 'This milestone changed since you loaded it.');
+      }
       await this.activity.record(tx, t, {
         type: 'milestone.deleted',
         entityType: 'milestone',

@@ -17,5 +17,6 @@ describe('format', () => {
     expect(relativeTime('2026-10-05T11:59:50Z', now)).toBe('just now');
     expect(relativeTime('2026-10-05T11:30:00Z', now)).toBe('30 minutes ago');
     expect(relativeTime('2026-10-04T12:00:00Z', now)).toBe('yesterday');
+    expect(relativeTime('2026-10-05T12:01:00Z', now)).toBe('just now');
   });
 });

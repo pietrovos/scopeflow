@@ -63,11 +63,14 @@ export function MilestoneList({ orgId, projectId, milestones, canEdit }: Props) 
   async function remove(m: Milestone) {
     if (!confirm(`Delete milestone “${m.title}”?`)) return;
     try {
-      await api.del(`${base}/${m.id}`);
+      await api.del(`${base}/${m.id}?version=${m.version}`);
       toast('Milestone deleted');
       router.refresh();
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'Delete failed', 'error');
+      if (e instanceof ApiError && e.isConflict) {
+        toast('Someone changed this milestone, so it was not deleted. Showing the latest version.', 'error');
+        router.refresh();
+      } else toast(e instanceof Error ? e.message : 'Delete failed', 'error');
     }
   }
 

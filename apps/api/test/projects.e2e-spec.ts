@@ -22,6 +22,23 @@ describe('projects and milestones', () => {
     expect(updated.body).toMatchObject({ name: 'App', status: 'ON_HOLD' });
   });
 
+  it('a partial update only touches the fields it sends', async () => {
+    const m = await t.as(w.member);
+    const created = await m
+      .post(base())
+      .send({ name: 'Keep', clientName: 'C', description: 'Details', budgetCents: 500, dueDate: '2026-12-01' })
+      .expect(201);
+    const res = await m.patch(`${base()}/${created.body.id}`).send({ status: 'ON_HOLD' }).expect(200);
+    expect(res.body).toMatchObject({ description: 'Details', budgetCents: 500, status: 'ON_HOLD' });
+    expect(res.body.dueDate).toMatch(/^2026-12-01/);
+
+    const url = `${base()}/${created.body.id}/milestones`;
+    const ms = await m.post(url).send({ title: 'M', description: 'Keep me', amountCents: 900, dueDate: '2026-11-01' });
+    const updated = await m.patch(`${url}/${ms.body.id}`).send({ status: 'DONE', version: 1 }).expect(200);
+    expect(updated.body).toMatchObject({ description: 'Keep me', amountCents: 900, status: 'DONE' });
+    expect(updated.body.dueDate).toMatch(/^2026-11-01/);
+  });
+
   it('validates input', async () => {
     const res = await (await t.as(w.member)).post(base()).send({ name: '', clientName: 'x' }).expect(400);
     expect(res.body.issues).toEqual([expect.objectContaining({ path: 'name' })]);

@@ -25,34 +25,55 @@ export const updateMembershipSchema = z.object({
 export const PROJECT_STATUSES = ['ACTIVE', 'ON_HOLD', 'COMPLETED', 'ARCHIVED'] as const;
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 
-export const createProjectSchema = z.object({
+// Update schemas are built from these default-free fields. Zod 4 applies `.default()`
+// even inside `.partial()`, so deriving updates from the create schemas would reset
+// omitted fields (e.g. a status-only PATCH would blank the description).
+const projectFields = {
   name: trimmed(120),
   clientName: trimmed(120),
-  description: z.string().trim().max(5000).default(''),
-  budgetCents: z.number().int().min(0).max(1_000_000_000).default(0),
-  dueDate: isoDate.nullable().default(null),
+  description: z.string().trim().max(5000),
+  budgetCents: z.number().int().min(0).max(1_000_000_000),
+  dueDate: isoDate.nullable(),
+};
+
+export const createProjectSchema = z.object({
+  ...projectFields,
+  description: projectFields.description.default(''),
+  budgetCents: projectFields.budgetCents.default(0),
+  dueDate: projectFields.dueDate.default(null),
 });
 export type CreateProjectInput = z.input<typeof createProjectSchema>;
 
-export const updateProjectSchema = createProjectSchema.partial().extend({
-  status: z.enum(PROJECT_STATUSES).optional(),
-});
+export const updateProjectSchema = z
+  .object(projectFields)
+  .partial()
+  .extend({
+    status: z.enum(PROJECT_STATUSES).optional(),
+  });
 
 export const assignProjectSchema = z.object({ userId: z.uuid() });
 
 export const MILESTONE_STATUSES = ['PLANNED', 'IN_PROGRESS', 'DONE'] as const;
 export type MilestoneStatus = (typeof MILESTONE_STATUSES)[number];
 
-export const createMilestoneSchema = z.object({
+const milestoneFields = {
   title: trimmed(160),
-  description: z.string().trim().max(5000).default(''),
-  dueDate: isoDate.nullable().default(null),
-  amountCents: z.number().int().min(0).max(1_000_000_000).default(0),
+  description: z.string().trim().max(5000),
+  dueDate: isoDate.nullable(),
+  amountCents: z.number().int().min(0).max(1_000_000_000),
+};
+
+export const createMilestoneSchema = z.object({
+  ...milestoneFields,
+  description: milestoneFields.description.default(''),
+  dueDate: milestoneFields.dueDate.default(null),
+  amountCents: milestoneFields.amountCents.default(0),
 });
 export type CreateMilestoneInput = z.input<typeof createMilestoneSchema>;
 
 /** Every write to a versioned resource must say which version it was based on. */
-export const updateMilestoneSchema = createMilestoneSchema
+export const updateMilestoneSchema = z
+  .object(milestoneFields)
   .partial()
   .extend({ status: z.enum(MILESTONE_STATUSES).optional(), version });
 export type UpdateMilestoneInput = z.input<typeof updateMilestoneSchema>;

@@ -15,7 +15,9 @@ export function relativeTime(iso: string, now = Date.now()): string {
   const seconds = Math.round((new Date(iso).getTime() - now) / 1000);
   const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
   const abs = Math.abs(seconds);
-  if (abs < 45) return 'just now';
+  // The caller's clock may lag by up to a minute (LocalTime ticks per minute), so a
+  // timestamp slightly in the future also counts as now.
+  if (seconds > -45 && seconds < 120) return 'just now';
   if (abs < 3600) return rtf.format(Math.round(seconds / 60), 'minute');
   if (abs < 86400) return rtf.format(Math.round(seconds / 3600), 'hour');
   if (abs < 86400 * 7) return rtf.format(Math.round(seconds / 86400), 'day');
