@@ -49,8 +49,10 @@ export function describeActivity(e: Pick<ActivityEventDto, 'type' | 'data'>): st
       return `rejected revision ${num(d.revisionNumber)} of ${sc(d)}`;
     case 'scope_change.withdrawn':
       return `withdrew ${sc(d)}`;
-    case 'comment.created':
-      return 'commented';
+    case 'comment.created': {
+      const body = str((d.comment as { body?: unknown } | undefined)?.body);
+      return body ? `commented “${body.length > 80 ? `${body.slice(0, 77)}…` : body}”` : 'commented';
+    }
     case 'billing.plan_changed':
       return `changed the plan to ${str(d.plan)}`;
     default:

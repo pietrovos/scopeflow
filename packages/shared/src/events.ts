@@ -3,6 +3,7 @@ export const WS = {
   joinProject: 'project:join',
   leaveProject: 'project:leave',
   activity: 'activity',
+  accessRevoked: 'access:revoked',
 } as const;
 
 export const ACTIVITY_TYPES = [
@@ -39,4 +40,13 @@ export interface ActivityEventDto {
   data: Record<string, unknown>;
   actor: { id: string; name: string } | null;
   createdAt: string;
+}
+
+export interface CommentDto {
+  id: string;
+  body: string;
+  projectId: string;
+  scopeChangeId: string | null;
+  createdAt: string;
+  author: { id: string; name: string };
 }

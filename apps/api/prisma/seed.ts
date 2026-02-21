@@ -284,6 +284,7 @@ async function main() {
         approvedRevisionId: status === 'APPROVED' ? current.id : null,
         status,
         version: revisions.length + (outcome ? 1 : 0),
+        updatedAt: tick(1),
       },
     });
     return sc;
@@ -370,7 +371,17 @@ async function main() {
         type: 'comment.created',
         entityType: 'comment',
         entityId: c.id,
-        data: { preview: body.slice(0, 80), scopeChangeId },
+        data: {
+          comment: {
+            id: c.id,
+            body,
+            projectId,
+            scopeChangeId: c.scopeChangeId,
+            createdAt: c.createdAt.toISOString(),
+            author: { id: author.id, name: author.name },
+          },
+          scopeChangeId: c.scopeChangeId,
+        },
       },
       c.createdAt,
     );

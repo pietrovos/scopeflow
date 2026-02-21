@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { isStaff } from '@scopeflow/shared';
 import { serverApi } from '@/lib/server-api';
-import type { OrgSummary, ScopeChangeDetail } from '@/lib/types';
+import type { ActivityEventDto, OrgSummary, ScopeChangeDetail } from '@/lib/types';
+import type { CommentDto } from '@scopeflow/shared';
+import { ProjectLive } from '@/lib/realtime';
+import { Discussion } from '@/components/live/discussion';
 import { LocalTime } from '@/components/ui/local-time';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardHeader } from '@/components/ui/card';
@@ -20,15 +23,23 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function ScopeChangePage({ params }: Props) {
   const { orgId, projectId, scopeChangeId } = await params;
-  const [org, sc] = await Promise.all([
+  const [org, sc, activity, comments] = await Promise.all([
     serverApi<OrgSummary>(`/orgs/${orgId}`),
     serverApi<ScopeChangeDetail>(`/orgs/${orgId}/projects/${projectId}/scope-changes/${scopeChangeId}`),
+    serverApi<{ items: ActivityEventDto[] }>(`/orgs/${orgId}/projects/${projectId}/activity?limit=30`),
+    serverApi<CommentDto[]>(`/orgs/${orgId}/projects/${projectId}/comments?scopeChangeId=${scopeChangeId}`),
   ]);
   const current = sc.revisions.find((r) => r.id === sc.currentRevisionId)!;
   const staff = isStaff(org.role);
 
   return (
-    <>
+    <ProjectLive
+      orgId={orgId}
+      projectId={projectId}
+      scopeChangeId={scopeChangeId}
+      initialEvents={activity.items}
+      initialComments={comments}
+    >
       <PageHeader
         eyebrow={
           <Link href={`/orgs/${orgId}/projects/${projectId}`} className="hover:text-text">
@@ -81,6 +92,12 @@ export default async function ScopeChangePage({ params }: Props) {
               <p className="whitespace-pre-wrap text-sm leading-6">{current.description}</p>
             </div>
           </Card>
+          <Discussion
+            orgId={orgId}
+            projectId={projectId}
+            scopeChangeId={scopeChangeId}
+            title={`Discussion on SC-${sc.number}`}
+          />
         </div>
 
         <Card className="h-fit">
@@ -96,6 +113,6 @@ export default async function ScopeChangePage({ params }: Props) {
           </div>
         </Card>
       </div>
-    </>
+    </ProjectLive>
   );
 }

@@ -9,6 +9,8 @@ export interface TokenClaims {
   email: string;
   emailVerified: boolean;
   name: string;
+  /** Token expiry, ms since epoch. */
+  expiresAt: number;
 }
 
 export function remoteJwks(env: Env): JWTVerifyGetKey {
@@ -47,6 +49,7 @@ export class JwtVerifier {
       email: payload.email.toLowerCase(),
       emailVerified: payload.email_verified === true,
       name,
+      expiresAt: (payload.exp ?? Math.floor(Date.now() / 1000) + 300) * 1000,
     };
   }
 }

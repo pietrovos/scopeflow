@@ -169,6 +169,17 @@ describe('scope changes with immutable revisions', () => {
     });
   });
 
+  it('threads comments on a proposal, but only on the same project', async () => {
+    const sc = await propose();
+    const comments = `/orgs/${w.org.id}/projects/${w.project.id}/comments`;
+    await (await t.as(w.client)).post(comments).send({ body: 'Is SMS included?', scopeChangeId: sc.id }).expect(201);
+    const thread = await (await t.as(w.member)).get(`${comments}?scopeChangeId=${sc.id}`).expect(200);
+    expect(thread.body.map((c: { body: string }) => c.body)).toEqual(['Is SMS included?']);
+
+    const other = `/orgs/${w.org.id}/projects/${w.hiddenProject.id}/comments`;
+    await (await t.as(w.member)).post(other).send({ body: 'Wrong project', scopeChangeId: sc.id }).expect(404);
+  });
+
   it('writes the whole history to the audit log', async () => {
     const sc = await propose();
     const v2 = (await revise(sc, { priceDeltaCents: 1000 })).body;

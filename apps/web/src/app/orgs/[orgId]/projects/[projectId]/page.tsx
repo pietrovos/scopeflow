@@ -1,7 +1,11 @@
 import Link from 'next/link';
 import { formatCents, isManager } from '@scopeflow/shared';
 import { serverApi } from '@/lib/server-api';
-import type { Member, ProjectDetail, ScopeChangeSummary } from '@/lib/types';
+import type { ActivityEventDto, Member, ProjectDetail, ScopeChangeSummary } from '@/lib/types';
+import type { CommentDto } from '@scopeflow/shared';
+import { ProjectLive } from '@/lib/realtime';
+import { Discussion } from '@/components/live/discussion';
+import { ActivityFeed } from '@/components/live/activity-feed';
 import { formatDate } from '@/lib/format';
 import { PageHeader } from '@/components/page-header';
 import { Card } from '@/components/ui/card';
@@ -23,16 +27,19 @@ export async function generateMetadata({ params }: PageProps<'/orgs/[orgId]/proj
 
 export default async function ProjectPage({ params }: PageProps<'/orgs/[orgId]/projects/[projectId]'>) {
   const { orgId, projectId } = await params;
-  const [project, scopeChanges] = await Promise.all([
+  const [project, scopeChanges, activity, comments] = await Promise.all([
     serverApi<ProjectDetail>(`/orgs/${orgId}/projects/${projectId}`),
     serverApi<ScopeChangeSummary[]>(`/orgs/${orgId}/projects/${projectId}/scope-changes`),
+    serverApi<{ items: ActivityEventDto[] }>(`/orgs/${orgId}/projects/${projectId}/activity?limit=30`),
+    serverApi<CommentDto[]>(`/orgs/${orgId}/projects/${projectId}/comments`),
   ]);
+  const discussion = <Discussion orgId={orgId} projectId={projectId} />;
   const manager = isManager(project.viewerRole);
   const members = project.canEdit ? await serverApi<Member[]>(`/orgs/${orgId}/members`) : [];
   const totalMilestones = project.milestones.reduce((sum, m) => sum + m.amountCents, 0);
 
   return (
-    <>
+    <ProjectLive orgId={orgId} projectId={projectId} initialEvents={activity.items} initialComments={comments}>
       <PageHeader
         eyebrow={
           <Link href={`/orgs/${orgId}/projects`} className="hover:text-text">
@@ -56,7 +63,7 @@ export default async function ProjectPage({ params }: PageProps<'/orgs/[orgId]/p
       {!project.canEdit ? (
         <div className="space-y-6">
           <ProjectSummary project={project} />
-          <ScopeChangeList orgId={orgId} projectId={projectId} items={scopeChanges} canPropose={false} />
+
           <div className={project.description ? 'grid gap-6 xl:grid-cols-[1fr_20rem]' : undefined}>
             <Card>
               <CardHeader title="Timeline" description="Where the project stands, milestone by milestone." />
@@ -69,6 +76,11 @@ export default async function ProjectPage({ params }: PageProps<'/orgs/[orgId]/p
               </Card>
             )}
           </div>
+          <ScopeChangeList orgId={orgId} projectId={projectId} items={scopeChanges} canPropose={false} />
+          <div className="grid items-start gap-6 xl:grid-cols-[1fr_20rem]">
+            {discussion}
+            <ActivityFeed />
+          </div>
         </div>
       ) : (
         <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
@@ -80,6 +92,7 @@ export default async function ProjectPage({ params }: PageProps<'/orgs/[orgId]/p
               canEdit={project.canEdit}
             />
             <ScopeChangeList orgId={orgId} projectId={projectId} items={scopeChanges} canPropose />
+            {discussion}
           </div>
 
           <aside className="space-y-6">
@@ -116,9 +129,10 @@ export default async function ProjectPage({ params }: PageProps<'/orgs/[orgId]/p
                 canManage={manager}
               />
             )}
+            <ActivityFeed />
           </aside>
         </div>
       )}
-    </>
+    </ProjectLive>
   );
 }

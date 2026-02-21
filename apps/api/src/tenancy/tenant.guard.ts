@@ -21,6 +21,8 @@ export class TenantGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Socket handlers authenticate in the gateway's handshake middleware instead.
+    if (context.getType() !== 'http') return true;
     const req = context.switchToHttp().getRequest<Request>();
     const orgId = req.params?.orgId;
     const required = this.reflector.getAllAndOverride<Role[] | undefined>(ROLES_KEY, [
