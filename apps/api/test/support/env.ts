@@ -13,7 +13,8 @@ process.env.DATABASE_OWNER_URL = process.env.TEST_DATABASE_OWNER_URL;
 process.env.OIDC_ISSUER = 'https://issuer.test/realms/scopeflow';
 process.env.OIDC_INTERNAL_URL = '';
 process.env.OIDC_AUDIENCE = 'scopeflow-api';
-process.env.STRIPE_SECRET_KEY = 'sk_test_dummy';
+// No API key: checkout/portal report 503, but webhook signatures still verify.
+process.env.STRIPE_SECRET_KEY = '';
 process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_secret';
 process.env.STRIPE_PRICE_PRO = 'price_pro_test';
 process.env.STRIPE_PRICE_AGENCY = 'price_agency_test';

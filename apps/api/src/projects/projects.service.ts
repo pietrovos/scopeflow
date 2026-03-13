@@ -4,7 +4,7 @@ import type { z } from 'zod';
 import { TenantDb } from '../db/tenant-db.service.js';
 import { ActivityService } from '../activity/activity.service.js';
 import type { TenantContext } from '../tenancy/tenant-context.js';
-import { PlanLimits } from './plan-limits.js';
+import { PlanLimits } from '../billing/plan-limits.js';
 
 const toDate = (d: string | null | undefined) => (d === undefined ? undefined : d === null ? null : new Date(d));
 

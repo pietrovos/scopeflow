@@ -1,5 +1,5 @@
 import { createTestApp, type TestApp } from './support/app.js';
-import { resetDatabase } from './support/db.js';
+import { ownerDb, resetDatabase } from './support/db.js';
 import { buildOrg, type World } from './support/world.js';
 
 describe('projects and milestones', () => {
@@ -44,8 +44,14 @@ describe('projects and milestones', () => {
     expect(res.body.issues).toEqual([expect.objectContaining({ path: 'name' })]);
   });
 
-  it('enforces the free plan project limit', async () => {
+  it('enforces the free plan project and seat limits', async () => {
+    await ownerDb.organization.update({ where: { id: w.org.id }, data: { plan: 'FREE' } });
     const o = await t.as(w.owner);
+    // Owner, admin and member already fill the free plan's 3 seats; clients don't count.
+    const seat = await o.post(`/orgs/${w.org.id}/invitations`).send({ email: 'dev@example.test', role: 'MEMBER' });
+    expect(seat.status).toBe(403);
+    expect(seat.body.error).toBe('plan_limit');
+    await o.post(`/orgs/${w.org.id}/invitations`).send({ email: 'cl@example.test', role: 'CLIENT' }).expect(201);
     await o.post(base()).send({ name: 'Third', clientName: 'x' }).expect(201);
     const res = await o.post(base()).send({ name: 'Fourth', clientName: 'x' }).expect(403);
     expect(res.body.error).toBe('plan_limit');

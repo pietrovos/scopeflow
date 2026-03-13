@@ -25,7 +25,7 @@ export const PLAN_INFO: Record<Plan, PlanInfo> = {
     priceMonthly: 49,
     maxActiveProjects: 25,
     maxSeats: 10,
-    features: ['25 active projects', '10 team seats', 'Email notifications', 'Audit log export'],
+    features: ['25 active projects', '10 team seats', 'Unlimited clients'],
   },
   AGENCY: {
     id: 'AGENCY',
@@ -33,6 +33,6 @@ export const PLAN_INFO: Record<Plan, PlanInfo> = {
     priceMonthly: 149,
     maxActiveProjects: null,
     maxSeats: null,
-    features: ['Unlimited projects', 'Unlimited seats', 'Priority support'],
+    features: ['Unlimited projects', 'Unlimited seats', 'Unlimited clients'],
   },
 };

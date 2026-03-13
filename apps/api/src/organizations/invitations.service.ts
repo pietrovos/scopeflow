@@ -13,6 +13,7 @@ import type { z } from 'zod';
 import { TenantDb } from '../db/tenant-db.service.js';
 import { SystemPrismaService } from '../db/prisma.service.js';
 import { ActivityService } from '../activity/activity.service.js';
+import { PlanLimits } from '../billing/plan-limits.js';
 import { ENV, type Env } from '../config/env.js';
 import type { AuthUser } from '../auth/users.service.js';
 import type { TenantContext } from '../tenancy/tenant-context.js';
@@ -47,6 +48,7 @@ export class InvitationsService {
     private readonly db: TenantDb,
     private readonly system: SystemPrismaService,
     private readonly activity: ActivityService,
+    private readonly limits: PlanLimits,
     @Inject(ENV) private readonly env: Env,
     @Inject(INVITATION_LISTENER) private readonly onCreated: InvitationListener,
   ) {}
@@ -84,6 +86,8 @@ export class InvitationsService {
         where: { email: input.email, acceptedAt: null, revokedAt: null },
         data: { revokedAt: new Date() },
       });
+
+      if (input.role !== 'CLIENT') await this.limits.assertCanAddSeat(tx, t.orgId);
 
       const invitation = await tx.invitation.create({
         data: {

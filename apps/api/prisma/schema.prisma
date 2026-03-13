@@ -79,6 +79,8 @@ model Organization {
   stripeSubscriptionId String?   @unique @map("stripe_subscription_id")
   subscriptionStatus   String?   @map("subscription_status")
   currentPeriodEnd     DateTime? @map("current_period_end")
+  /// Creation time of the last Stripe event applied, so late-arriving older events are ignored.
+  billingSyncedAt      DateTime? @map("billing_synced_at")
   createdAt            DateTime  @default(now()) @map("created_at")
 
   memberships  Membership[]

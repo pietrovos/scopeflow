@@ -15,6 +15,8 @@ import { ScopeChangesModule } from './scope-changes/scope-changes.module.js';
 import { MailModule } from './mail/mail.module.js';
 import { CommentsModule } from './comments/comments.module.js';
 import { RealtimeModule } from './realtime/realtime.module.js';
+import { PlanLimitsModule } from './billing/plan-limits.module.js';
+import { BillingModule } from './billing/billing.module.js';
 import { HealthController } from './health/health.controller.js';
 
 @Module({
@@ -24,6 +26,7 @@ import { HealthController } from './health/health.controller.js';
     MailModule,
     AuthModule,
     TenancyModule,
+    PlanLimitsModule,
     ActivityModule,
     OrganizationsModule,
     ProjectsModule,
@@ -31,6 +34,7 @@ import { HealthController } from './health/health.controller.js';
     ScopeChangesModule,
     CommentsModule,
     RealtimeModule,
+    BillingModule,
   ],
   controllers: [HealthController],
   providers: [

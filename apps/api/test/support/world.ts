@@ -1,5 +1,6 @@
 import type { TestApp } from './app.js';
 import { identity, type TestIdentity } from './auth.js';
+import { ownerDb } from './db.js';
 
 const tokenFromUrl = (url: string) => url.split('/invitations/')[1]!;
 
@@ -35,6 +36,8 @@ export async function buildOrg(t: TestApp, label: string) {
       .send({ name: `${label} Agency` })
       .expect(201)
   ).body as { id: string; name: string };
+  // Fixtures need more seats than the free plan has; plan-limit tests downgrade explicitly.
+  await ownerDb.organization.update({ where: { id: org.id }, data: { plan: 'PRO' } });
   const project = (
     await o
       .post(`/orgs/${org.id}/projects`)

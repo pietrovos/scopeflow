@@ -16,7 +16,7 @@ export const NAV: NavItem[] = [
   { href: (o) => `/orgs/${o}/approvals`, label: 'Approvals', roles: ALL, icon: 'approvals' },
   { href: (o) => `/orgs/${o}/members`, label: 'Team & clients', roles: STAFF, icon: 'members' },
   { href: (o) => `/orgs/${o}/audit`, label: 'Audit log', roles: STAFF, icon: 'audit' },
+  { href: (o) => `/orgs/${o}/settings/billing`, label: 'Billing', roles: MANAGERS, icon: 'billing' },
 ];
 
 export const navFor = (role: Role) => NAV.filter((item) => item.roles.includes(role));
-export { MANAGERS };
