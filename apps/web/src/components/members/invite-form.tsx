@@ -112,7 +112,8 @@ export function InviteForm({
       {created?.url && (
         <div className="rounded-md border border-border bg-surface-2 p-3 text-sm">
           <p>
-            Share this link with <strong>{created.email}</strong>. It works once and expires in 7 days.
+            We emailed <strong>{created.email}</strong>. You can also share this link directly; it works once and
+            expires in 7 days.
           </p>
           <CopyLink url={created.url} className="mt-2" />
         </div>

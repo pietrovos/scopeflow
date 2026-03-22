@@ -33,4 +33,8 @@ also need separate review.
 5. Socket handshake (`realtime/realtime.gateway.ts`): the same membership lookup
    as (2), for socket connections.
 
+6. Email recipients (`notifications/notifications.service.ts`): find the clients on a
+   project, or the owner/admins of an org, to notify. The acting user (e.g. a client approving
+   a change) cannot see those memberships under RLS. Every query filters by the event's `orgId`.
+
 Adding to this list needs a reason in code review.

@@ -17,6 +17,7 @@ import { CommentsModule } from './comments/comments.module.js';
 import { RealtimeModule } from './realtime/realtime.module.js';
 import { PlanLimitsModule } from './billing/plan-limits.module.js';
 import { BillingModule } from './billing/billing.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
 import { HealthController } from './health/health.controller.js';
 
 @Module({
@@ -28,6 +29,7 @@ import { HealthController } from './health/health.controller.js';
     TenancyModule,
     PlanLimitsModule,
     ActivityModule,
+    NotificationsModule,
     OrganizationsModule,
     ProjectsModule,
     MilestonesModule,
