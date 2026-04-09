@@ -1,7 +1,8 @@
 import { cn } from '@/lib/cn';
 import { initials } from '@/lib/format';
 
-const palette = ['bg-indigo-500', 'bg-emerald-600', 'bg-amber-600', 'bg-rose-500', 'bg-sky-600', 'bg-violet-500'];
+// 700-level fills keep white initials above 4.5:1 contrast.
+const palette = ['bg-indigo-600', 'bg-emerald-700', 'bg-amber-700', 'bg-rose-700', 'bg-sky-700', 'bg-violet-700'];
 
 function colorFor(seed: string) {
   let h = 0;

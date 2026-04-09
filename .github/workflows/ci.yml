@@ -44,5 +44,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - name: Migrate and seed a fresh database
+        run: pnpm --filter @scopeflow/api db:migrate && pnpm --filter @scopeflow/api db:seed
       - name: Build
         run: pnpm --filter @scopeflow/api build && pnpm --filter @scopeflow/web build

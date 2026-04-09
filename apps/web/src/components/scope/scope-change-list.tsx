@@ -39,7 +39,7 @@ export function ScopeChangeList({
             <li key={sc.id}>
               <Link
                 href={`/orgs/${orgId}/projects/${projectId}/scope-changes/${sc.id}`}
-                className="flex flex-col gap-2 px-4 py-4 hover:bg-surface-2 sm:flex-row sm:items-center sm:px-5"
+                className="flex flex-col items-start gap-2 px-4 py-4 hover:bg-surface-2 sm:flex-row sm:items-center sm:px-5"
               >
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">

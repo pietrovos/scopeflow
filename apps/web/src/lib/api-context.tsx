@@ -48,6 +48,7 @@ export function useApi() {
   return useMemo(() => {
     const request = async <T,>(method: Method, path: string, body?: unknown, retried = false): Promise<T> => {
       const res = await fetch(`${baseUrl}${path}`, {
+        signal: AbortSignal.timeout(15_000),
         method,
         headers: {
           Authorization: `Bearer ${tokenRef.current}`,

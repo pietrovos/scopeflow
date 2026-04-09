@@ -8,7 +8,7 @@
  *   pnpm db:seed
  */
 import { resolve } from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, type Prisma } from '../src/generated/prisma/client.js';
 
@@ -399,6 +399,25 @@ async function main() {
     reminders.id,
   );
   await comment(onboarding.id, leo, 'Can we see the payment step on Android before Friday’s review?');
+
+  // A pending invitation, so the team page shows one. Its link is never printed, so it can't be used.
+  await db.invitation.create({
+    data: {
+      orgId: org,
+      email: 'jules@northwind.test',
+      role: 'MEMBER',
+      tokenHash: createHash('sha256').update(randomUUID()).digest('hex'),
+      invitedById: priya.id,
+      expiresAt: dateOnly(6),
+    },
+  });
+  log({
+    actorId: priya.id,
+    type: 'member.invited',
+    entityType: 'invitation',
+    entityId: org,
+    data: { email: 'jules@northwind.test', role: 'MEMBER' },
+  });
 
   // --- Harbor & Pine: a second agency to show tenant isolation ------------------
   const harbor = await db.organization.create({

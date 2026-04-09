@@ -18,10 +18,17 @@ export async function getAccessToken(): Promise<string> {
  */
 export async function serverApi<T>(path: string): Promise<T> {
   const token = await getAccessToken();
-  const res = await fetch(`${baseUrl()}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store',
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${baseUrl()}${path}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+      // Bound the request time so the route can display its error state.
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    throw new ApiError(503, { error: 'api_unreachable', message: 'The ScopeFlow API is not responding.' });
+  }
   if (res.status === 401) redirect('/?signin=expired');
   if (res.status === 404) notFound();
   if (res.status === 403) forbidden();
