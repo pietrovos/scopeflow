@@ -10,8 +10,9 @@ import Keycloak from 'next-auth/providers/keycloak';
  * OIDC_INTERNAL_URL. Giving explicit endpoints (instead of discovery) lets the two
  * differ while tokens still carry the public issuer.
  */
-const issuer = process.env.OIDC_ISSUER!;
-const internal = (process.env.OIDC_INTERNAL_URL || issuer).replace(/\/$/, '');
+// Read at request time, not import time: Docker images are built without these set.
+const issuer = () => process.env.OIDC_ISSUER!;
+const internal = () => (process.env.OIDC_INTERNAL_URL || issuer()).replace(/\/$/, '');
 const oidc = (base: string, path: string) => `${base}/protocol/openid-connect/${path}`;
 
 declare module 'next-auth' {
@@ -34,7 +35,7 @@ declare module 'next-auth/jwt' {
 async function refresh(token: JWT): Promise<JWT> {
   if (!token.refreshToken) return { ...token, error: 'RefreshTokenError' };
   try {
-    const res = await fetch(oidc(internal, 'token'), {
+    const res = await fetch(oidc(internal(), 'token'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
@@ -64,13 +65,13 @@ async function refresh(token: JWT): Promise<JWT> {
   }
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
   providers: [
     Keycloak({
-      issuer,
-      authorization: { url: oidc(issuer, 'auth'), params: { scope: 'openid email profile' } },
-      token: oidc(internal, 'token'),
-      userinfo: oidc(internal, 'userinfo'),
+      issuer: issuer(),
+      authorization: { url: oidc(issuer(), 'auth'), params: { scope: 'openid email profile' } },
+      token: oidc(internal(), 'token'),
+      userinfo: oidc(internal(), 'userinfo'),
     }),
   ],
   session: { strategy: 'jwt' },
@@ -96,6 +97,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
-});
+}));
 
-export const keycloakEndSessionUrl = () => oidc(issuer, 'logout');
+export const keycloakEndSessionUrl = () => oidc(issuer(), 'logout');

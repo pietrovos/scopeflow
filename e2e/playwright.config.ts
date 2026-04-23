@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 /** Drives the full stack (web, api, keycloak, postgres). Start it first; see README. */
 export default defineConfig({
   testDir: './tests',
+  globalSetup: './global-setup.ts',
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,

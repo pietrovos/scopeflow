@@ -37,5 +37,4 @@ export async function serverApi<T>(path: string): Promise<T> {
 }
 
 /** URL the browser should use for the API; read at runtime so images need no rebuild. */
-export const publicApiUrl = () =>
-  process.env.PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4100';
+export const publicApiUrl = () => process.env.PUBLIC_API_URL ?? 'http://localhost:4100';
