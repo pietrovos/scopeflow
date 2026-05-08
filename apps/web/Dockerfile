@@ -18,4 +18,6 @@ COPY --from=build --chown=node:node /repo/apps/web/.next/static ./apps/web/.next
 COPY --from=build --chown=node:node /repo/apps/web/public ./apps/web/public
 USER node
 EXPOSE 3100
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
+  CMD node -e "fetch('http://127.0.0.1:3100/').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
 CMD ["node", "apps/web/server.js"]

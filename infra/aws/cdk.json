@@ -1,0 +1,8 @@
+{
+  "app": "npx tsx bin/scopeflow.ts",
+  "context": {
+    "domain": "scopeflow.example.com",
+    "certificateArn": "",
+    "mailFrom": "no-reply@scopeflow.example.com"
+  }
+}

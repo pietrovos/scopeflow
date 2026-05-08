@@ -13,7 +13,9 @@
     "test": "pnpm -r test",
     "e2e": "pnpm --filter e2e e2e",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "db:seed": "pnpm --filter @scopeflow/api db:seed",
+    "db:migrate": "pnpm --filter @scopeflow/api db:migrate"
   },
   "devDependencies": {
     "prettier": "3.7.3"

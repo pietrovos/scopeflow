@@ -44,6 +44,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - name: Synthesize AWS infrastructure (no credentials needed)
+        run: pnpm --filter @scopeflow/infra synth
       - name: Migrate and seed a fresh database
         run: pnpm --filter @scopeflow/api db:migrate && pnpm --filter @scopeflow/api db:seed
       - name: Build

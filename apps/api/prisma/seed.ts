@@ -228,7 +228,8 @@ async function main() {
           priceDeltaCents: r.price,
           deadlineDeltaDays: r.days,
           createdById: r.by.id,
-          createdAt: tick(20),
+          // Revision 1 is the proposal itself; later revisions come hours or days after.
+          createdAt: i === 0 ? sc.createdAt : tick(20),
         },
       });
       created.push(rev);

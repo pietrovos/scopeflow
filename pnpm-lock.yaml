@@ -206,6 +206,27 @@ importers:
       typescript:
         specifier: 5.9.3
         version: 5.9.3
+  infra/aws:
+    dependencies:
+      aws-cdk-lib:
+        specifier: 2.230.0
+        version: 2.230.0(constructs@10.4.3)
+      constructs:
+        specifier: 10.4.3
+        version: 10.4.3
+    devDependencies:
+      '@types/node':
+        specifier: 22.19.1
+        version: 22.19.1
+      aws-cdk:
+        specifier: 2.1033.0
+        version: 2.1033.0
+      tsx:
+        specifier: 4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
   .:
     devDependencies:
       prettier:

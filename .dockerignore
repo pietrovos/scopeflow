@@ -10,3 +10,5 @@ apps/api/src/generated
 .env
 .env.*
 !.env.example
+**/cdk.out
+e2e/test-results

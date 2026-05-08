@@ -1,0 +1,22 @@
+{
+  "name": "@scopeflow/infra",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "synth": "cdk synth --quiet",
+    "diff": "cdk diff",
+    "deploy": "cdk deploy",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.230.0",
+    "constructs": "10.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.1",
+    "aws-cdk": "2.1033.0",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3"
+  }
+}

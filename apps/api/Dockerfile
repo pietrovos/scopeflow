@@ -16,8 +16,12 @@ FROM base AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build --chown=node:node /out ./
+COPY --chmod=755 apps/api/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 USER node
 EXPOSE 4100
-# Migrations run as the schema owner (DATABASE_OWNER_URL) before the server starts.
-# On ECS this is a separate one-off task; see infra/aws/README.md.
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
+  CMD node -e "fetch('http://127.0.0.1:4100/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
+ENTRYPOINT ["docker-entrypoint.sh"]
+# Locally, migrations run before the server starts. On ECS the service runs only the
+# server and migrations are a separate one-off task (infra/aws/README.md).
 CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node dist/main.js"]
