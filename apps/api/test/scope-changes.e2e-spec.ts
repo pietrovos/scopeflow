@@ -138,7 +138,9 @@ describe('scope changes with immutable revisions', () => {
       .post(`${base}/${sc.id}/revisions`)
       .send({ ...content, version: 1 })
       .expect(403);
-    await (await t.as(w.owner))
+    await (
+      await t.as(w.owner)
+    )
       .post(`${base}/${sc.id}/decision`)
       .send({ revisionId: sc.currentRevisionId, decision: 'APPROVED' })
       .expect(403);

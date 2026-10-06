@@ -1,7 +1,7 @@
 {
   "name": "scopeflow",
   "private": true,
-  "packageManager": "pnpm@10.24.0",
+  "packageManager": "pnpm@11.3.0",
   "engines": {
     "node": ">=22"
   },
@@ -18,6 +18,6 @@
     "db:migrate": "pnpm --filter @scopeflow/api db:migrate"
   },
   "devDependencies": {
-    "prettier": "3.7.3"
+    "prettier": "^3.9.9"
   }
 }

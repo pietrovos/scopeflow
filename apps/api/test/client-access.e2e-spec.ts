@@ -80,7 +80,9 @@ describe('client visibility', () => {
 
   it('gains access when assigned to another project', async () => {
     const clientUserId = w.membershipOf(w.client).user.id;
-    await (await t.as(w.owner))
+    await (
+      await t.as(w.owner)
+    )
       .post(`${org()}/projects/${w.hiddenProject.id}/clients`)
       .send({ userId: clientUserId })
       .expect(204);

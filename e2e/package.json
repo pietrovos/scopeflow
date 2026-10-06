@@ -8,9 +8,9 @@
     "lint": "tsc --noEmit"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.11.0",
-    "@playwright/test": "1.57.0",
-    "@types/node": "22.19.1",
-    "typescript": "5.9.3"
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^24.19.1",
+    "typescript": "~6.0.3"
   }
 }

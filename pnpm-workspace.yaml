@@ -4,9 +4,10 @@ packages:
   - e2e
   - infra/aws
 
-onlyBuiltDependencies:
-  - '@prisma/engines'
-  - prisma
-  - esbuild
-  - sharp
-  - unrs-resolver
+allowBuilds:
+  '@prisma/engines': true
+  prisma: true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+  '@nestjs/core': false

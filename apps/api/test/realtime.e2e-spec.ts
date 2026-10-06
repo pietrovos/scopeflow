@@ -117,7 +117,9 @@ describe('real-time activity over socket.io', () => {
     await comment(a.member, a, 'Missed 2');
 
     // What the browser does on reconnect: fetch everything after the last seq it saw.
-    const res = await (await t.as(a.client))
+    const res = await (
+      await t.as(a.client)
+    )
       .get(`/orgs/${a.org.id}/projects/${a.project.id}/activity?after=${seen!.seq}`)
       .expect(200);
     expect(res.body.items.map((e: ActivityEventDto) => (e.data.comment as { body: string }).body)).toEqual([
@@ -132,7 +134,9 @@ describe('real-time activity over socket.io', () => {
     await join(socket, a.org.id, a.project.id);
     const revoked = new Promise((resolve) => socket.once(WS.accessRevoked, resolve));
     const clientUserId = a.membershipOf(a.client).user.id;
-    await (await t.as(a.owner))
+    await (
+      await t.as(a.owner)
+    )
       .delete(`/orgs/${a.org.id}/projects/${a.project.id}/clients/${clientUserId}`)
       .expect(204);
     expect(await revoked).toEqual({ orgId: a.org.id, projectId: a.project.id });

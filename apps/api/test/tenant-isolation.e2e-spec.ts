@@ -23,7 +23,9 @@ describe('tenant isolation: org A cannot reach org B through any endpoint', () =
     b = await buildOrg(t, 'Bravo');
     routes = listRoutes(t.app);
 
-    const bInvite = await (await t.as(b.owner))
+    const bInvite = await (
+      await t.as(b.owner)
+    )
       .post(`/orgs/${b.org.id}/invitations`)
       .send({ email: 'pending@bravo.test', role: 'MEMBER' })
       .expect(201);
@@ -170,7 +172,9 @@ function bodyFor(ids: Record<string, string>) {
 
 /** IDs for resources added by later milestones; extended as the API grows. */
 async function extraIds(t: TestApp, b: World): Promise<Record<string, string>> {
-  const sc = await (await t.as(b.owner))
+  const sc = await (
+    await t.as(b.owner)
+  )
     .post(`/orgs/${b.org.id}/projects/${b.project.id}/scope-changes`)
     .send({ title: 'Bravo change', description: 'Bravo scope', priceDeltaCents: 5000, deadlineDeltaDays: 2 })
     .expect(201);

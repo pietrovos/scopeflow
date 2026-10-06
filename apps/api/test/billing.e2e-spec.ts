@@ -138,7 +138,9 @@ describe('Stripe billing', () => {
     });
     await (await t.as(w.member)).get(`/orgs/${w.org.id}/billing`).expect(403);
     await (await t.as(w.admin)).post(`/orgs/${w.org.id}/billing/checkout`).send({ plan: 'PRO' }).expect(403);
-    const res = await (await t.as(w.owner))
+    const res = await (
+      await t.as(w.owner)
+    )
       .post(`/orgs/${w.org.id}/billing/checkout`)
       .send({ plan: 'PRO' })
       .expect(503);

@@ -26,7 +26,9 @@ describe('email notifications', () => {
   afterAll(() => t.close());
 
   it('emails the invitee a working link', async () => {
-    const res = await (await t.as(w.owner))
+    const res = await (
+      await t.as(w.owner)
+    )
       .post(`/orgs/${w.org.id}/invitations`)
       .send({ email: 'new.hire@example.test', role: 'MEMBER' })
       .expect(201);
@@ -54,7 +56,9 @@ describe('email notifications', () => {
   it('tells the owner, admins and proposer about the client decision', async () => {
     const sc = (await (await t.as(w.member)).post(base).send(content).expect(201)).body;
     t.mailer.clear();
-    await (await t.as(w.client))
+    await (
+      await t.as(w.client)
+    )
       .post(`${base}/${sc.id}/decision`)
       .send({ revisionId: sc.currentRevisionId, decision: 'APPROVED', note: 'Go ahead' })
       .expect(201);
@@ -78,7 +82,9 @@ describe('email notifications', () => {
 
   it('does not fail the request when email delivery fails', async () => {
     t.mailer.failing = true;
-    await (await t.as(w.owner))
+    await (
+      await t.as(w.owner)
+    )
       .post(`/orgs/${w.org.id}/invitations`)
       .send({ email: 'unlucky@example.test', role: 'MEMBER' })
       .expect(201);
